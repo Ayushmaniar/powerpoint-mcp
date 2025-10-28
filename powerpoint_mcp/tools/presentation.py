@@ -119,9 +119,9 @@ def manage_presentation(
                 # Ensure directory exists
                 os.makedirs(os.path.dirname(abs_file_path), exist_ok=True)
                 presentation.SaveAs(abs_file_path)
-                return f"Successfully created and saved new presentation: {presentation.Name} at {abs_file_path}"
+                return f"Created presentation '{presentation.Name}' at {abs_file_path}. Has 0 slides. Use add_slide_with_layout to add slides before populating content."
             else:
-                return f"Successfully created new presentation: {presentation.Name} (not saved)"
+                return f"Created presentation '{presentation.Name}' (not saved). Has 0 slides. Use add_slide_with_layout to add slides before populating content."
 
         elif action == "save":
             if ppt_app.Presentations.Count == 0:
