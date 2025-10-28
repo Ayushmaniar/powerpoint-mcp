@@ -1,0 +1,57 @@
+[project]
+name = "powerpoint-mcp"
+version = "0.0.1"
+description = "Model Context Protocol server for end-to-end PowerPoint presentation creation, analysis, and editing"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Ayushmaniar"}
+]
+keywords = [
+    "mcp",
+    "powerpoint",
+    "automation",
+    "pywin32",
+    "model-context-protocol",
+    "claude"
+]
+classifiers = [
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Office/Business",
+]
+
+dependencies = [
+    "mcp>=1.14.0",
+    "pywin32>=311",
+    "Pillow>=10.4.0",
+    "matplotlib>=3.7.0",
+    "numpy>=1.24.0",
+]
+
+[project.scripts]
+powerpoint-mcp = "powerpoint_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["powerpoint_mcp"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/powerpoint_mcp",
+    "/pyproject.toml",
+]
+exclude = [
+    "*.pptx",
+    "*.ppt",
+    "*.jpg",
+    "*.png",
+    "*.docx",
+    "*.pdf",
+    ".claude/",
+    "Academic Project/",
+    "test_tools/",
+    "dist/",
+]
