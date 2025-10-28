@@ -335,38 +335,38 @@ def apply_latex_equations(ppt_app, text_range, latex_segments: list):
 
                 # Get the LaTeX text range (it's already set as plain text)
                 char_range = text_range.Characters(start_pos, length)
-                
+
                 # Get the latex content and measure length before conversion
                 latex_content = segment['latex']
                 old_eq_length = length
                 text_length_before = get_powerpoint_char_length(text_range.Text)
-                
+
                 # Convert LaTeX to equation using ExecuteMso commands
                 try:
                     # Select the character range containing the LaTeX
                     char_range.Select()
                     time.sleep(0.05)
-                    
+
                     # Execute PowerPoint's equation commands
                     ppt_app.CommandBars.ExecuteMso("InsertBuildingBlocksEquationsGallery")
                     time.sleep(0.1)
                     ppt_app.CommandBars.ExecuteMso("EquationLaTeXToMath")
                     time.sleep(0.05)
-                    
+
                     # Measure the actual new length by comparing total text length (using PowerPoint's UTF-16 counting)
                     try:
                         time.sleep(0.05)  # Give time for the conversion to complete
                         text_length_after = get_powerpoint_char_length(text_range.Text)
-                        
+
                         # Calculate new equation length: new_total = old_total - old_eq_length + new_eq_length
                         new_eq_length = text_length_after - text_length_before + old_eq_length
-                        
+
                         # Store the actual new length for position adjustment
                         segment['actual_new_length'] = new_eq_length
                     except:
                         # If measurement fails, assume no change
                         segment['actual_new_length'] = old_eq_length
-                    
+
                 except:
                     # If conversion fails, leave the LaTeX text as-is
                     segment['actual_new_length'] = old_eq_length
@@ -375,6 +375,13 @@ def apply_latex_equations(ppt_app, text_range, latex_segments: list):
             except Exception:
                 # Continue with other segments even if one fails
                 pass
+
+        # After processing ALL LaTeX segments, switch back to normal view
+        # This prevents PowerPoint from staying in the Equation tab
+        try:
+            ppt_app.ActiveWindow.ViewType = 9  # ppViewNormal = 9 (official Microsoft constant)
+        except:
+            pass
 
     except Exception:
         # Silently fail if LaTeX processing encounters an error
