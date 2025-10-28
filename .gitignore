@@ -63,13 +63,14 @@ htmlcov/
 *.ppt
 .powerpoint-mcp/
 screenshots/
-slide-*.png
 
-# Test files
-test_tools/*.jpg
-test_tools/*.png
-test_tools/.venv/
-test_tools/uv.lock
+# Images
+*.png
+*.jpg
+*.jpeg
+
+# Test directory
+test_tools/
 
 # Local development
 .claude/
