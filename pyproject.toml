@@ -20,11 +20,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Topic :: Office/Business",
 ]
-
-[project.urls]
-Repository = "https://github.com/Ayushmaniar/powerpoint-mcp"
-Homepage = "https://github.com/Ayushmaniar/powerpoint-mcp"
-
 dependencies = [
     "mcp>=1.14.0",
     "pywin32>=311",
@@ -35,6 +30,10 @@ dependencies = [
 
 [project.scripts]
 powerpoint-mcp = "powerpoint_mcp.server:main"
+
+[project.urls]
+Repository = "https://github.com/Ayushmaniar/powerpoint-mcp"
+Homepage = "https://github.com/Ayushmaniar/powerpoint-mcp"
 
 [build-system]
 requires = ["hatchling"]
