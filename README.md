@@ -46,7 +46,7 @@ claude mcp add powerpoint --scope user -- uvx powerpoint-mcp
 
 
 ### VS Code (GitHub Copilot)
-1) Open `C:\Users\Rajat\AppData\Roaming\Code\User\mcp.json`
+1) Open `C:\Users\Your_User_Name\AppData\Roaming\Code\User\mcp.json`
 2) Copy-paste this json
 ```json
 {
