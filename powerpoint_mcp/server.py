@@ -154,8 +154,15 @@ def populate_placeholder(
     placeholder_name: str,
     content: str,
     content_type: str = "auto",
-    slide_number: Optional[int] = None
+    slide_number: Optional[str] = None
 ) -> str:
+    # Convert string to int if provided
+    if slide_number is not None:
+        try:
+            slide_number = int(slide_number)
+        except ValueError:
+            return f"Error: slide_number must be a valid integer, got '{slide_number}'"
+
     result = powerpoint_populate_placeholder(placeholder_name, content, content_type, slide_number)
     return generate_populate_response(result)
 
@@ -177,10 +184,17 @@ manage_slide.__doc__ = desc.MANAGE_SLIDE
 @mcp.tool()
 def powerpoint_evaluate_tool(
     code: str,
-    slide_number: Optional[int] = None,
+    slide_number: Optional[str] = None,
     shape_ref: Optional[str] = None,
     description: Optional[str] = None
 ) -> str:
+    # Convert string to int if provided
+    if slide_number is not None:
+        try:
+            slide_number = int(slide_number)
+        except ValueError:
+            return f"Error: slide_number must be a valid integer, got '{slide_number}'"
+
     result = powerpoint_evaluate(code, slide_number, shape_ref, description)
     return generate_evaluate_response(result)
 
