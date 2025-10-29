@@ -172,9 +172,15 @@ populate_placeholder.__doc__ = desc.POPULATE_PLACEHOLDER
 @mcp.tool()
 def manage_slide(
     operation: str,
-    slide_number: int,
+    slide_number: str,
     target_position: Optional[int] = None
 ) -> str:
+    # Convert string to int
+    try:
+        slide_number = int(slide_number)
+    except ValueError:
+        return f"Error: slide_number must be a valid integer, got '{slide_number}'"
+
     result = powerpoint_manage_slide(operation, slide_number, target_position)
     return generate_manage_slide_response(result)
 
