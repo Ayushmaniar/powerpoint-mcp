@@ -1,6 +1,6 @@
 [project]
 name = "powerpoint-mcp"
-version = "0.0.11"
+version = "0.0.12"
 description = "Model Context Protocol server for end-to-end PowerPoint presentation creation, analysis, and editing"
 requires-python = ">=3.10"
 license = {text = "MIT"}
