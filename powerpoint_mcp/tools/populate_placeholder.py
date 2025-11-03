@@ -459,21 +459,28 @@ def render_matplotlib_plot(matplotlib_code: str) -> str:
         import matplotlib
         matplotlib.use('Agg')  # Use non-interactive backend
         import matplotlib.pyplot as plt
+        import numpy as np
 
         # Create a temporary file for the plot
         temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
         temp_path = temp_file.name
         temp_file.close()
 
+        # Clean matplotlib code: remove plt.savefig() and plt.close() if present
+        cleaned_code = re.sub(r'plt\.savefig\s*\([^)]*\)', '', matplotlib_code)
+        cleaned_code = re.sub(r'plt\.close\s*\([^)]*\)', '', cleaned_code)
+
         # Create a clean namespace for code execution
         exec_namespace = {
             'plt': plt,
             'matplotlib': matplotlib,
+            'np': np,
+            'numpy': np,
             '__builtins__': __builtins__
         }
 
         # Execute the matplotlib code
-        exec(matplotlib_code, exec_namespace)
+        exec(cleaned_code, exec_namespace)
 
         # Save the figure
         plt.savefig(temp_path, dpi=300, bbox_inches='tight')

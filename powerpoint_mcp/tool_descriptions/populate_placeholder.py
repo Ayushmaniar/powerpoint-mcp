@@ -3,15 +3,20 @@
 DESCRIPTION = """
     Populate a PowerPoint placeholder with content including HTML formatting and LaTeX equations.
 
-    Supports semantic placeholder names and auto-detects content type (text/image).
+    Supports semantic placeholder names and auto-detects content type (text/image/plot).
     Handles simplified HTML formatting: <b>bold</b>, <i>italic</i>, <u>underline</u>,
     colors like <red>text</red>, lists <ul><li>items</li></ul>, and LaTeX equations <latex>equation</latex>.
 
     Args:
         placeholder_name: Name of the placeholder (e.g., "Title 1", "Subtitle 2")
-        content: Text with HTML/LaTeX formatting or image file path
-        content_type: "text", "image", or "auto" (auto-detect based on content)
+        content: Text with HTML/LaTeX formatting, image file path, or matplotlib code
+        content_type: "text", "image", "plot", or "auto" (auto-detect based on content)
         slide_number: Target slide number (1-based). If None, uses current active slide
+
+    Matplotlib plots:
+        - Use content_type="plot" for matplotlib code
+        - DO NOT include plt.savefig() or plt.close() - these are handled automatically
+        - Imports available: numpy as np, matplotlib.pyplot as plt
 
     Returns:
         Success message with operation details, or error message
