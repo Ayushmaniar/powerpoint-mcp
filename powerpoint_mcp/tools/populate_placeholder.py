@@ -9,6 +9,12 @@ import tempfile
 import win32com.client
 from typing import Optional
 
+# Initialize matplotlib at module level to avoid first-call delays
+import matplotlib
+matplotlib.use('Agg')  # Non-interactive backend (must be set before importing pyplot)
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 def detect_content_type(content: str) -> str:
     """Auto-detect if content is an image file or text."""
@@ -456,11 +462,6 @@ def render_matplotlib_plot(matplotlib_code: str) -> str:
         Path to the generated PNG image file
     """
     try:
-        import matplotlib
-        matplotlib.use('Agg')  # Use non-interactive backend
-        import matplotlib.pyplot as plt
-        import numpy as np
-
         # Create a temporary file for the plot
         temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
         temp_path = temp_file.name
@@ -492,8 +493,8 @@ def render_matplotlib_plot(matplotlib_code: str) -> str:
         raise Exception(f"Failed to render matplotlib plot: {str(e)}")
 
 
-def populate_image_placeholder(shape, image_path: str):
-    """Populate a placeholder with an image."""
+def populate_image_placeholder(shape, image_path: str, matplotlib_code: Optional[str] = None):
+    """Populate a placeholder with an image and optionally add matplotlib code to alt text."""
     if not os.path.exists(image_path):
         return {"error": f"Image file not found: {image_path}"}
 
@@ -561,13 +562,23 @@ def populate_image_placeholder(shape, image_path: str):
             except Exception:
                 pass
 
+        # Add matplotlib code to AlternativeText if provided
+        alt_text_added = False
+        if matplotlib_code:
+            try:
+                new_shape.AlternativeText = f"Code used to generate this image:\n\n{matplotlib_code}"
+                alt_text_added = True
+            except Exception:
+                pass
+
         result = {
             "success": True,
             "content_type": "image",
             "image_path": image_path,
             "new_shape_id": new_shape.Id,
             "new_shape_name": new_shape.Name,
-            "dimensions": f"{final_width} x {final_height}"
+            "dimensions": f"{final_width} x {final_height}",
+            "alt_text_added": alt_text_added
         }
 
         if (
@@ -651,12 +662,14 @@ def powerpoint_populate_placeholder(
 
         # Handle matplotlib plot rendering
         temp_plot_path = None
+        matplotlib_code_for_alt_text = None
         if content_type == "plot":
             try:
                 temp_plot_path = render_matplotlib_plot(content)
                 # Treat the rendered plot as an image
                 actual_content = temp_plot_path
                 actual_content_type = "image"
+                matplotlib_code_for_alt_text = content
             except Exception as e:
                 return {"error": f"Failed to render matplotlib plot: {str(e)}"}
         else:
@@ -667,7 +680,7 @@ def powerpoint_populate_placeholder(
         if actual_content_type == "text":
             result = populate_text_placeholder(ppt_app, target_shape, actual_content)
         elif actual_content_type == "image":
-            result = populate_image_placeholder(target_shape, actual_content)
+            result = populate_image_placeholder(target_shape, actual_content, matplotlib_code_for_alt_text)
         else:
             return {"error": f"Unsupported content type '{content_type}'. Use 'text', 'image', 'plot', or 'auto'."}
 
