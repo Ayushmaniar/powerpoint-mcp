@@ -17,6 +17,7 @@ from .tools.add_slide_with_layout import powerpoint_add_slide_with_layout, gener
 from .tools.populate_placeholder import powerpoint_populate_placeholder, generate_mcp_response as generate_populate_response
 from .tools.manage_slide import powerpoint_manage_slide, generate_mcp_response as generate_manage_slide_response
 from .tools.evaluate import powerpoint_evaluate, generate_mcp_response as generate_evaluate_response
+from .tools.add_animation import powerpoint_add_animation, generate_mcp_response as generate_animation_response
 
 # Create the MCP server instance
 mcp = FastMCP("PowerPoint MCP Server")
@@ -494,7 +495,83 @@ def powerpoint_evaluate_tool(
 
     result = powerpoint_evaluate(code, slide_number, shape_ref, description)
     return generate_evaluate_response(result)
-  
+
+
+@mcp.tool()
+def add_animation(
+    shape_name: str,
+    effect: str = "fade",
+    animate_text: str = "all_at_once",
+    slide_number: Optional[str] = None
+) -> str:
+    """
+    Add animation effects to shapes in PowerPoint presentations.
+
+    This tool enables visual storytelling by animating shapes with entrance effects.
+    It supports both shape-level and paragraph-level animation, allowing for progressive
+    disclosure of content.
+
+    Args:
+        shape_name: Name of the shape to animate
+            Examples: "Title 1", "Content Placeholder 2", "Chart", "Picture 3"
+
+        effect: Animation effect type (default: "fade")
+            Options:
+              "fade" - Smooth fade-in (most professional)
+              "appear" - Instant pop-in (no animation)
+              "fly" - Fly in from bottom
+              "wipe" - Wipe from left to right
+              "zoom" - Zoom in from center
+
+        animate_text: How to animate text within the shape (default: "all_at_once")
+            Options:
+              "all_at_once" - Entire text box animates together
+              "by_paragraph" - Each paragraph/bullet animates separately (progressive disclosure)
+
+        slide_number: Slide number (1-based). If None, uses current active slide
+
+    Animation Behavior:
+        - Animations trigger on click during presentation
+        - Animations are added in the order you call this tool
+        - Each call replaces any existing animation on the shape
+        - Default duration: 0.5 seconds (smooth but not slow)
+
+    Common Use Cases:
+        1. Progressive Bullet Points:
+           add_animation("Content Placeholder 2", effect="fly", animate_text="by_paragraph")
+           → Each bullet flies in separately
+
+        2. Title Introduction:
+           add_animation("Title 1", effect="fade")
+           → Title fades in
+
+        3. Chart Reveal:
+           add_animation("Chart", effect="zoom")
+           → Chart zooms in from center
+
+        4. Sequential Building:
+           add_animation("Title", effect="fade")
+           add_animation("Image 1", effect="wipe")
+           add_animation("Caption", effect="appear")
+           → Elements appear in sequence: title → image → caption
+
+    Returns:
+        Success: Animation number, total animations on slide, paragraph count (if applicable)
+        Error: Shape not found with list of available shapes, or invalid parameters
+
+    Note: This tool focuses on entrance animations only. Exit animations and complex timing
+    control should be done via powerpoint_evaluate_tool if needed.
+    """
+    # Convert string to int if provided
+    if slide_number is not None:
+        try:
+            slide_number = int(slide_number)
+        except ValueError:
+            return f"Error: slide_number must be a valid integer, got '{slide_number}'"
+
+    result = powerpoint_add_animation(shape_name, effect, animate_text, slide_number)
+    return generate_animation_response(result)
+
 
 def main():
     """Main entry point for the PowerPoint MCP server."""
