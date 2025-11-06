@@ -116,20 +116,19 @@ def powerpoint_add_animation(
 
         # Add animation effect(s)
         if animate_text.lower() == "by_paragraph" and paragraph_count and paragraph_count > 0:
-            # Create one Effect per paragraph (PowerPoint's approach for "by paragraph")
-            for para_index in range(1, paragraph_count + 1):
-                new_effect = main_sequence.AddEffect(
-                    Shape=target_shape,
-                    effectId=effect_id,
-                    Level=2,  # msoAnimateTextByFirstLevel
-                    trigger=1,  # msoAnimTriggerOnPageClick
-                    Index=-1
-                )
-                # Set which paragraph this effect applies to
-                new_effect.Paragraph = para_index
-                # Set timing
-                new_effect.Timing.Duration = 0.5
-                new_effect.Timing.TriggerDelayTime = 0.0
+            # The ONLY way to animate by paragraph in PowerPoint COM is to use Level=2
+            # Level=2 (msoAnimateTextByFirstLevel) automatically creates animations for each paragraph
+            # We then need to access the effect's Behaviors to control individual paragraphs
+            new_effect = main_sequence.AddEffect(
+                Shape=target_shape,
+                effectId=effect_id,
+                Level=2,  # msoAnimateTextByFirstLevel - this is the key!
+                trigger=1,  # msoAnimTriggerOnPageClick
+                Index=-1
+            )
+            # Set timing on the main effect
+            new_effect.Timing.Duration = 0.5
+            new_effect.Timing.TriggerDelayTime = 0.0
         else:
             # Animate entire shape at once
             new_effect = main_sequence.AddEffect(

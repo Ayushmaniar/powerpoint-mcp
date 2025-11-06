@@ -65,6 +65,7 @@ def process_simple_html(html_text: str):
 
     # IMPORTANT: Process numbered lists FIRST before bullet lists
     # Convert ordered lists to numbered points
+    # Use \r (carriage return) for PowerPoint paragraph breaks
     ol_pattern = r'<ol>(.*?)</ol>'
     def replace_ol(match):
         ol_content = match.group(1)
@@ -76,18 +77,20 @@ def process_simple_html(html_text: str):
             formatted_item = item.strip()
             numbered_items.append(f"{i}. {formatted_item}")
 
-        return '\n' + '\n'.join(numbered_items) + '\n' if numbered_items else ''
+        # Add \r before the list to start on a new line, and after each item
+        return '\r' + '\r'.join(numbered_items) + '\r' if numbered_items else ''
 
     text = re.sub(ol_pattern, replace_ol, text, flags=re.DOTALL)
 
     # THEN process unordered lists (bullet points)
-    text = re.sub(r'<ul>\s*', '\n', text)  # Add newline before starting list
-    text = re.sub(r'</ul>\s*', '\n', text)
-    text = re.sub(r'<li>\s*', '• ', text)
-    text = re.sub(r'</li>\s*', '\n', text)
+    # IMPORTANT: Use \r (carriage return) for PowerPoint paragraph breaks, not \n
+    text = re.sub(r'<ul>\s*', '\r', text)  # Add paragraph break before list starts
+    text = re.sub(r'</ul>\s*', '', text)  # Remove closing tag
+    text = re.sub(r'<li>\s*', '• ', text)  # Start bullet with bullet character
+    text = re.sub(r'</li>\s*', '\r', text)  # End bullet with paragraph break (\r)
 
-    # Handle basic line breaks
-    text = re.sub(r'<br\s*/?>', '\n', text, flags=re.IGNORECASE)
+    # Handle basic line breaks (use \r for paragraph breaks in PowerPoint)
+    text = re.sub(r'<br\s*/?>', '\r', text, flags=re.IGNORECASE)
 
     # Extract LaTeX segments before processing other tags
     latex_segments = []
