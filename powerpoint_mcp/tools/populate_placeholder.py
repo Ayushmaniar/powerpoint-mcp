@@ -56,16 +56,30 @@ def process_simple_html(html_text: str):
     - <red>text</red>, <blue>text</blue>, <green>text</green>, etc.
     - <ul><li>item</li></ul>, <ol><li>item</li></ol>
     - <latex>equation</latex> for LaTeX equations
+    - <para>text</para> for animation grouping
 
     Returns:
-        tuple: (plain_text, format_segments, latex_segments)
+        tuple: (plain_text, format_segments, latex_segments, para_segments)
     """
+    # Extract <para> segments for counting
+    para_segments = []
+    para_pattern = r'<para>(.*?)</para>'
+    para_matches = list(re.finditer(para_pattern, html_text, re.IGNORECASE | re.DOTALL))
+    for match in para_matches:
+        para_segments.append({'content': match.group(1)})
+
+    # Process <para> tags - replace </para> with \r to create paragraph breaks
+    # Remove <para> opening tags
+    text = re.sub(r'<para>', '', html_text, flags=re.IGNORECASE)
+    # Replace </para> closing tags with \r (paragraph break)
+    text = re.sub(r'</para>', '\r', text, flags=re.IGNORECASE)
+
     # Handle lists first (convert to plain text with bullets/numbers)
-    text = html_text
 
     # IMPORTANT: Process numbered lists FIRST before bullet lists
-    # Convert ordered lists to numbered points
-    # Use \r (carriage return) for PowerPoint paragraph breaks
+    # Lists use \n (line breaks) NOT \r (paragraph breaks)
+    # This way entire lists animate as one unit
+    # Only <para> tags create paragraph breaks (\r) for animation control
     ol_pattern = r'<ol>(.*?)</ol>'
     def replace_ol(match):
         ol_content = match.group(1)
@@ -77,20 +91,21 @@ def process_simple_html(html_text: str):
             formatted_item = item.strip()
             numbered_items.append(f"{i}. {formatted_item}")
 
-        # Add \r before the list to start on a new line, and after each item
-        return '\r' + '\r'.join(numbered_items) + '\r' if numbered_items else ''
+        # Use \n for list items (not \r) so they don't create separate paragraphs
+        return '\n' + '\n'.join(numbered_items) if numbered_items else ''
 
     text = re.sub(ol_pattern, replace_ol, text, flags=re.DOTALL)
 
     # THEN process unordered lists (bullet points)
-    # IMPORTANT: Use \r (carriage return) for PowerPoint paragraph breaks, not \n
-    text = re.sub(r'<ul>\s*', '\r', text)  # Add paragraph break before list starts
+    # Use \n (line breaks) for bullets, not \r (paragraph breaks)
+    # This keeps entire bullet list as one animation unit
+    text = re.sub(r'<ul>\s*', '\n', text)  # Add line break before list starts
     text = re.sub(r'</ul>\s*', '', text)  # Remove closing tag
     text = re.sub(r'<li>\s*', '• ', text)  # Start bullet with bullet character
-    text = re.sub(r'</li>\s*', '\r', text)  # End bullet with paragraph break (\r)
+    text = re.sub(r'</li>\s*', '\n', text)  # End bullet with line break (\n)
 
-    # Handle basic line breaks (use \r for paragraph breaks in PowerPoint)
-    text = re.sub(r'<br\s*/?>', '\r', text, flags=re.IGNORECASE)
+    # Handle basic line breaks (use \n for visual breaks, NOT \r)
+    text = re.sub(r'<br\s*/?>', '\n', text, flags=re.IGNORECASE)
 
     # Extract LaTeX segments before processing other tags
     latex_segments = []
@@ -159,7 +174,10 @@ def process_simple_html(html_text: str):
     # Remove all HTML tags to get final plain text
     plain_text = re.sub(r'<[^>]+>', '', plain_text)
 
-    return plain_text, format_segments, latex_segments
+    # Count para segments (just for reporting, we don't need positions anymore)
+    para_count = len(para_segments)
+
+    return plain_text, format_segments, latex_segments, para_count
 
 
 def clear_placeholder_bullets(text_range):
@@ -407,7 +425,7 @@ def populate_text_placeholder(ppt_app, shape, content: str):
 
     if has_html:
         # Process HTML formatting and LaTeX tags
-        plain_text, format_segments, latex_segments = process_simple_html(content)
+        plain_text, format_segments, latex_segments, para_count = process_simple_html(content)
         
         # Set the text first WITHOUT clearing bullets yet
         text_range = shape.TextFrame.TextRange
@@ -438,7 +456,8 @@ def populate_text_placeholder(ppt_app, shape, content: str):
             "html_input": content,
             "plain_text": plain_text,
             "format_segments_applied": len(format_segments),
-            "latex_equations_applied": len(latex_segments)
+            "latex_equations_applied": len(latex_segments),
+            "para_segments_detected": para_count
         }
     else:
         # Simple plain text

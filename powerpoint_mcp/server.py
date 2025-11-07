@@ -286,7 +286,8 @@ def populate_placeholder(
 
     Supports semantic placeholder names and auto-detects content type (text/image/plot).
     Handles simplified HTML formatting: <b>bold</b>, <i>italic</i>, <u>underline</u>,
-    colors like <red>text</red>, lists <ul><li>items</li></ul>, and LaTeX equations <latex>equation</latex>.
+    colors like <red>text</red>, lists <ul><li>items</li></ul>, LaTeX equations <latex>equation</latex>,
+    and animation grouping with <para>content</para> tags.
 
     Args:
         placeholder_name: Name of the placeholder (e.g., "Title 1", "Subtitle 2")
@@ -337,6 +338,23 @@ def populate_placeholder(
         # Numbered lists with equations
         populate_placeholder("List2",
             "Steps:<ol><li>Start with <latex>f(x)=x^2</latex></li><li>Take derivative: <latex>f'(x)=2x</latex></li><li><green>Result is linear!</green></li></ol>")
+
+        # Animation grouping with <para> tags
+        # Each <para> block becomes a separate PowerPoint paragraph for animation
+        # Use with add_animation(shape_name, "fade", animate_text="by_paragraph") to animate each section separately
+        populate_placeholder("Content Placeholder 2",
+            "<para><b><blue>Section 1: Introduction</blue></b>\\n• Point A\\n• Point B\\n• Point C</para><para><b><blue>Section 2: Analysis</blue></b>\\n• Point D\\n• Point E\\n• Point F</para>")
+        # Result: 2 PowerPoint paragraphs (one per <para>), each animates separately with by_paragraph
+
+        # Complex <para> example with LaTeX equations
+        populate_placeholder("Content Placeholder 2",
+            "<para><b><red>Quadratic Equations</red></b>\\nGeneral form: <latex>ax^2+bx+c=0</latex>\\nSolutions: <latex>x=\\\\frac{-b\\\\pm\\\\sqrt{b^2-4ac}}{2a}</latex></para><para><b><blue>Trigonometry</blue></b>\\n• <b>Sine:</b> <latex>\\\\sin^2\\\\theta+\\\\cos^2\\\\theta=1</latex>\\n• <b>Tangent:</b> <latex>\\\\tan\\\\theta=\\\\frac{\\\\sin\\\\theta}{\\\\cos\\\\theta}</latex></para>")
+        # Result: 2 paragraphs with formatted text + LaTeX, each section animates as one unit
+
+        # Without <para> tags, lists are visual units but don't create paragraph boundaries
+        populate_placeholder("Content Placeholder 2",
+            "<ul><li>Item 1</li><li>Item 2</li><li>Item 3</li></ul>")
+        # Result: 1 PowerPoint paragraph (entire list animates together)
 
         # Image
         populate_placeholder("Picture Placeholder 7", "C:\\Images\\chart.png", "image")
