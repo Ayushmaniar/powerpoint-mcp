@@ -1,6 +1,6 @@
 [project]
 name = "powerpoint-mcp"
-version = "0.0.21"
+version = "0.0.22"
 description = "Open Source Model Context Protocol server for PowerPoint automation on Windows via pywin32"
 readme = "README.md"
 requires-python = ">=3.10"
