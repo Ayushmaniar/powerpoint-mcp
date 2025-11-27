@@ -107,7 +107,7 @@ def generate_mcp_response(result):
             summary_lines.append(f"{dir_type} Templates:")
 
             for template in templates:
-                summary_lines.append(f"  \"{template['name']}\"")
+                summary_lines.append(f"  \"{template['name']}\" - {template['path']}")
 
     # Add usage instructions
     summary_lines.extend([
