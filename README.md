@@ -2,6 +2,10 @@
 
 Model Context Protocol server for PowerPoint automation on Windows.
 
+## Launch Video
+
+[![Watch the PowerPoint MCP Demo](https://img.youtube.com/vi/5p24Vr36py8/maxresdefault.jpg)](https://www.youtube.com/watch?v=5p24Vr36py8)
+
 ---
 
 ## Windows Only
