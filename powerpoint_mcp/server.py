@@ -4,7 +4,7 @@ PowerPoint MCP Server
 A Model Context Protocol server for automating Microsoft PowerPoint using pywin32.
 """
 
-from typing import Optional
+from typing import Optional, Union
 from mcp.server.fastmcp import FastMCP
 
 from .tools.snapshot import powerpoint_snapshot
@@ -69,7 +69,7 @@ def manage_presentation_tool(
 
 
 @mcp.tool()
-def slide_snapshot(slide_number: Optional[str] = None,
+def slide_snapshot(slide_number: Optional[Union[str,int]] = None,
                   include_screenshot: Optional[bool] = True,
                   screenshot_filename: Optional[str] = None) -> str:
     """
@@ -140,7 +140,7 @@ def slide_snapshot(slide_number: Optional[str] = None,
 
 
 @mcp.tool()
-def switch_slide(slide_number: str) -> str:
+def switch_slide(slide_number: Union[str,int]) -> str:
     """
     Switch to a specific slide in the active PowerPoint presentation.
 
@@ -168,7 +168,7 @@ def switch_slide(slide_number: str) -> str:
 
 
 @mcp.tool()
-def add_speaker_notes(slide_number: str, notes_text: str) -> str:
+def add_speaker_notes(slide_number: Union[str,int], notes_text: str) -> str:
     """
     Add speaker notes to a specific slide in the active PowerPoint presentation.
 
@@ -279,7 +279,7 @@ def populate_placeholder(
     placeholder_name: str,
     content: str,
     content_type: str = "auto",
-    slide_number: Optional[str] = None
+    slide_number: Optional[Union[str,int]] = None
 ) -> str:
     """
     Populate a PowerPoint placeholder with content including HTML formatting and LaTeX equations.
@@ -393,7 +393,7 @@ plt.legend()''', "plot")
 @mcp.tool()
 def manage_slide(
     operation: str,
-    slide_number: str,
+    slide_number: Union[str,int],
     target_position: Optional[int] = None
 ) -> str:
     """
@@ -442,7 +442,7 @@ def manage_slide(
 @mcp.tool()
 def powerpoint_evaluate_tool(
     code: str,
-    slide_number: Optional[str] = None,
+    slide_number: Optional[Union[str,int]] = None,
     shape_ref: Optional[str] = None,
     description: Optional[str] = None
 ) -> str:
@@ -520,7 +520,7 @@ def add_animation(
     shape_name: str,
     effect: str = "fade",
     animate_text: str = "all_at_once",
-    slide_number: Optional[str] = None
+    slide_number: Optional[Union[str,int]] = None
 ) -> str:
     """
     Add animation effects to shapes in PowerPoint presentations.
