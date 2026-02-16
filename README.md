@@ -63,3 +63,8 @@ claude mcp add powerpoint --scope user -- uvx powerpoint-mcp
 }
 ```
 3) *Restart your IDE after configuration.*
+
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=ayushmaniar/powerpoint-mcp&type=date&legend=top-left)](https://www.star-history.com/#ayushmaniar/powerpoint-mcp&type=date&legend=top-left)
