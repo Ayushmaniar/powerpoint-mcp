@@ -1,7 +1,8 @@
 """
 PowerPoint MCP Server
 
-A Model Context Protocol server for automating Microsoft PowerPoint using pywin32.
+A Model Context Protocol server for automating Microsoft PowerPoint.
+Supports Windows (via pywin32 COM) and macOS (via JXA/AppleScript).
 """
 
 from typing import Optional, Union
@@ -33,7 +34,7 @@ def manage_presentation_tool(
     """
     Comprehensive PowerPoint presentation management tool.
 
-    This tool works on Windows only. Use Windows path format with double backslashes.
+    Works on Windows and macOS. Use platform-appropriate path format.
 
     Args:
         action: Action to perform - "open", "close", "create", "save", or "save_as"
@@ -44,22 +45,20 @@ def manage_presentation_tool(
 
     Actions:
         - "open": Opens an existing presentation (requires file_path)
-          Example: action="open", file_path="C:\\Users\\Name\\slides.pptx"
+          Windows: action="open", file_path="C:\\Users\\Name\\slides.pptx"
+          macOS: action="open", file_path="/Users/Name/Documents/slides.pptx"
 
         - "close": Closes a presentation (optional presentation_name, closes active if not specified)
           Example: action="close" or action="close", presentation_name="MyPresentation.pptx"
 
         - "create": Creates new presentation (optional file_path for immediate save, optional template_path)
-          Example: action="create", file_path="C:\\new\\presentation.pptx"
-          Example: action="create", template_path="C:\\templates\\corporate.potx", file_path="C:\\new\\slides.pptx"
+          Example: action="create", file_path="path/to/presentation.pptx"
 
         - "save": Saves current presentation at its current location
           Example: action="save"
 
         - "save_as": Saves current presentation to new location (requires save_path)
-          Example: action="save_as", save_path="C:\\backup\\slides_v2.pptx"
-
-    Use double backslashes (\\\\) in Windows paths.
+          Example: action="save_as", save_path="path/to/slides_v2.pptx"
 
     Returns:
         Success message with operation details, or error message
@@ -207,10 +206,9 @@ def list_templates() -> str:
     PowerPoint template files (.potx, .potm, .pot). Returns a clean list of
     template names that can be used with the analyze_template tool.
 
-    The tool searches in:
-    - Personal Templates: Custom Office Templates folder
-    - User Templates: AppData/Roaming/Microsoft/Templates
-    - System Templates: Program Files/Microsoft Office/Templates
+    Searches platform-appropriate template locations:
+    - Windows: Custom Office Templates, AppData/Microsoft/Templates, Program Files
+    - macOS: ~/Library/Group Containers/.../Templates, ~/Documents/Custom Office Templates
 
     Returns:
         Organized list of available templates grouped by location, with usage instructions

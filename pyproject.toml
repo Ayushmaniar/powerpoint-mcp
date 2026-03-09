@@ -1,7 +1,7 @@
 [project]
 name = "powerpoint-mcp"
-version = "0.0.24"
-description = "Open Source Model Context Protocol server for PowerPoint automation on Windows via pywin32"
+version = "0.1.0"
+description = "Cross-platform Model Context Protocol server for PowerPoint automation (Windows and macOS)"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
@@ -12,22 +12,24 @@ keywords = [
     "mcp",
     "powerpoint",
     "automation",
-    "pywin32",
     "model-context-protocol",
-    "claude"
+    "cross-platform"
 ]
 classifiers = [
     "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
     "Topic :: Office/Business",
 ]
 dependencies = [
     "mcp>=1.14.0",
-    "pywin32>=311",
     "Pillow>=10.4.0",
     "matplotlib>=3.7.0",
     "numpy>=1.24.0",
-    "python-docx>=1.2.0",
 ]
+
+[project.optional-dependencies]
+windows = ["pywin32>=311"]
+macos = []
 
 [project.scripts]
 powerpoint-mcp = "powerpoint_mcp.server:main"

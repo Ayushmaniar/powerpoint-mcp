@@ -4,9 +4,10 @@ Execute arbitrary Python code in PowerPoint automation context.
 """
 
 import math
-import win32com.client
-from typing import Optional, Any
 import json
+from typing import Optional, Any
+
+from ..backends import get_backend
 from .skills import skills
 
 
@@ -19,83 +20,48 @@ def powerpoint_evaluate(
     """
     Execute arbitrary Python code in PowerPoint automation context.
 
-    Enables free-form PowerPoint automation beyond predefined tools, including:
-    - Complex geometric calculations (circular flowcharts, grid layouts)
-    - Advanced shape manipulations (rotations, custom positioning)
-    - Data extraction using custom logic
-    - Multi-shape operations with mathematical relationships
-    - Access to all PowerPoint MCP tools via the 'skills' object
-
     Args:
-        code: Python code to execute. Has access to:
-              - ppt: PowerPoint Application object
-              - presentation: Active presentation
-              - slide: Current or specified slide
-              - shape: Target shape (if shape_ref provided)
-              - math: Python math module for calculations
-              - skills: Access to all PowerPoint MCP tools
-                  - skills.populate_placeholder(name, content)
-                  - skills.snapshot()
-                  - skills.switch_slide(n)
-                  - skills.add_speaker_notes(n, text)
-                  - skills.manage_slide(operation, n, target)
-                  - skills.manage_presentation(action, ...)
-                  - And more... (see skills.py for full list)
-
+        code: Python code to execute.
         slide_number: Target slide (1-based). If None, uses current slide
-        shape_ref: Optional shape ID/Name to operate on (from slide_snapshot)
+        shape_ref: Optional shape ID/Name to operate on
         description: Human-readable description of operation intent
 
     Returns:
         Dictionary with success/error status and optional result data
     """
-
     try:
-        # Get PowerPoint objects
-        ppt = win32com.client.Dispatch("PowerPoint.Application")
+        backend = get_backend()
+        backend.connect()
 
-        if not ppt.Presentations.Count:
+        feature_support = backend.get_feature_support()
+
+        if not feature_support.raw_evaluate:
+            return {
+                "error": "The evaluate tool is not supported on this platform. "
+                         "Use the dedicated MCP tools (populate_placeholder, add_animation, etc.) instead."
+            }
+
+        if not backend.get_presentation_count():
             return {"error": "No presentation is currently open"}
 
-        presentation = ppt.ActivePresentation
+        # Get raw COM/platform context
+        raw_context = backend.get_raw_context(slide_number, shape_ref)
+        if not raw_context:
+            return {"error": "Failed to get PowerPoint context"}
 
-        # Get target slide
-        if slide_number is not None:
-            if slide_number < 1 or slide_number > presentation.Slides.Count:
-                return {
-                    "error": f"Slide {slide_number} out of range (1-{presentation.Slides.Count})"
-                }
-            slide = presentation.Slides(slide_number)
-        else:
-            # Use current active slide
-            try:
-                slide = ppt.ActiveWindow.View.Slide
-            except:
-                # Fallback to first slide if no active window
-                if presentation.Slides.Count > 0:
-                    slide = presentation.Slides(1)
-                else:
-                    return {"error": "No slides in presentation"}
+        ppt = raw_context.get('ppt')
+        presentation = raw_context.get('presentation')
+        slide = raw_context.get('slide')
+        shape = raw_context.get('shape')
+        np = raw_context.get('np')
 
-        # Get target shape if specified
-        shape = None
-        if shape_ref:
-            for s in slide.Shapes:
-                if s.Name == shape_ref or str(s.Id) == shape_ref:
-                    shape = s
-                    break
-            if not shape:
-                return {"error": f"Shape '{shape_ref}' not found on slide {slide.SlideNumber}"}
+        if slide_number is not None and slide is None:
+            return {"error": f"Slide {slide_number} out of range"}
 
-        # Try to import numpy, but don't fail if unavailable
-        try:
-            import numpy as np
-            has_numpy = True
-        except ImportError:
-            np = None
-            has_numpy = False
+        if shape_ref and shape is None:
+            return {"error": f"Shape '{shape_ref}' not found"}
 
-        # Create execution context with PowerPoint objects and math utilities
+        # Create execution context
         context = {
             'ppt': ppt,
             'presentation': presentation,
@@ -103,42 +69,24 @@ def powerpoint_evaluate(
             'shape': shape,
             'math': math,
             'np': np,
-            'has_numpy': has_numpy,
-            'skills': skills,  # Access to all PowerPoint MCP tools
-            # Python builtins for general programming
-            'range': range,
-            'len': len,
-            'str': str,
-            'int': int,
-            'float': float,
-            'bool': bool,
-            'list': list,
-            'dict': dict,
-            'tuple': tuple,
-            'set': set,
-            'enumerate': enumerate,
-            'zip': zip,
-            'round': round,
-            'min': min,
-            'max': max,
-            'sum': sum,
-            'sorted': sorted,
-            'reversed': reversed,
-            'abs': abs,
-            'divmod': divmod,
-            'pow': pow,
-            'print': print,
+            'has_numpy': np is not None,
+            'skills': skills,
+            # Python builtins
+            'range': range, 'len': len, 'str': str, 'int': int,
+            'float': float, 'bool': bool, 'list': list, 'dict': dict,
+            'tuple': tuple, 'set': set, 'enumerate': enumerate, 'zip': zip,
+            'round': round, 'min': min, 'max': max, 'sum': sum,
+            'sorted': sorted, 'reversed': reversed, 'abs': abs,
+            'divmod': divmod, 'pow': pow, 'print': print,
         }
 
         # Execute the code
         exec(code, context)
 
-        # Check if code set a return value (via variable assignment)
+        # Check for return value
         result = context.get('result', None)
 
-        # Prepare response
         if result is not None:
-            # Try to serialize result to ensure it's JSON-compatible
             try:
                 json.dumps(result)
                 return {
