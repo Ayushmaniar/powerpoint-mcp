@@ -461,10 +461,10 @@ def populate_text_placeholder(ppt_app, shape, content: str):
             "para_segments_detected": para_count
         }
     else:
-        # Simple plain text
+        # Simple plain text — still decode HTML entities (e.g. &amp; &lt; &gt;)
         text_range = shape.TextFrame.TextRange
         clear_placeholder_bullets(text_range)
-        text_range.Text = content
+        text_range.Text = html.unescape(content)
         clear_placeholder_bullets(text_range)
 
         return {
