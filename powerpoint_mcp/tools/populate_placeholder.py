@@ -3,6 +3,7 @@ PowerPoint placeholder population tool for MCP server.
 Populates placeholders with text content (with basic HTML formatting) or images.
 """
 
+import html
 import os
 import re
 import tempfile
@@ -116,7 +117,7 @@ def process_simple_html(html_text: str):
         latex_content = match.group(1).strip()
 
         # Calculate position in text without any HTML tags
-        temp_plain = re.sub(r'<[^>]+>', '', text[:match.start()])
+        temp_plain = html.unescape(re.sub(r'<[^>]+>', '', text[:match.start()]))
         start_pos = get_powerpoint_char_length(temp_plain) + 1  # 1-based for PowerPoint
         length = get_powerpoint_char_length(latex_content)
 
@@ -155,10 +156,10 @@ def process_simple_html(html_text: str):
             tag_content_with_tags = match.group(1)  # May contain nested tags
 
             # Extract plain text from the tagged content
-            tag_content_plain = re.sub(r'<[^>]+>', '', tag_content_with_tags)
+            tag_content_plain = html.unescape(re.sub(r'<[^>]+>', '', tag_content_with_tags))
 
             # Find where this content will be in the final plain text
-            temp_plain = re.sub(r'<[^>]+>', '', plain_text[:match.start()])
+            temp_plain = html.unescape(re.sub(r'<[^>]+>', '', plain_text[:match.start()]))
 
             # Use PowerPoint-compatible character counting
             start_pos = get_powerpoint_char_length(temp_plain) + 1  # 1-based for PowerPoint
@@ -171,8 +172,8 @@ def process_simple_html(html_text: str):
                     'formatting': formatting
                 })
 
-    # Remove all HTML tags to get final plain text
-    plain_text = re.sub(r'<[^>]+>', '', plain_text)
+    # Remove all HTML tags to get final plain text, then decode HTML entities
+    plain_text = html.unescape(re.sub(r'<[^>]+>', '', plain_text))
 
     # Count para segments (just for reporting, we don't need positions anymore)
     para_count = len(para_segments)
