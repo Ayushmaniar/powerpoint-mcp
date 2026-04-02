@@ -147,6 +147,22 @@ claude mcp add powerpoint --scope user -- uvx powerpoint-mcp
 ```
 4. Restart your IDE after configuration.
 
+### OpenCode
+1. Open `~/.config/opencode/opencode.json` for a global setup, or `opencode.json` in your project root for a project-specific setup
+2. Add the following:
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "powerpoint": {
+      "type": "local",
+      "command": ["uvx", "powerpoint-mcp"]
+    }
+  }
+}
+```
+3. Restart OpenCode after configuration.
+
 ### VS Code (GitHub Copilot)
 1. Open `C:\Users\Your_User_Name\AppData\Roaming\Code\User\mcp.json`
 2. Add the following:
