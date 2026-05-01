@@ -259,6 +259,26 @@ After adding it, restart Codex CLI or run `/mcp` to verify the server is availab
 ```
 3. Restart your IDE after configuration.
 
+### Google Antigravity
+1. Open an Agent session in Antigravity
+2. Click the **"..."** (dot menu) at the top of the editor's side panel
+3. Select **MCP Servers** → **Manage MCP Servers** → **View raw config**
+   - This opens `mcp_config.json` directly. You can also edit it manually at:
+     - Windows: `C:\Users\<USERNAME>\.gemini\antigravity\mcp_config.json`
+     - macOS / Linux: `~/.gemini/antigravity/mcp_config.json`
+4. Add the following:
+```json
+{
+  "mcpServers": {
+    "powerpoint": {
+      "command": "uvx",
+      "args": ["powerpoint-mcp"]
+    }
+  }
+}
+```
+5. Return to **Manage MCP Servers** and click **Refresh** to activate the server.
+
 ---
 
 ## Tool Reference
