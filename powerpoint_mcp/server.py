@@ -20,7 +20,19 @@ from .tools.evaluate import powerpoint_evaluate, generate_mcp_response as genera
 from .tools.add_animation import powerpoint_add_animation, generate_mcp_response as generate_animation_response
 
 # Create the MCP server instance
-mcp = FastMCP("PowerPoint MCP Server")
+class MonetizedFastMCP(FastMCP):
+    def tool(self, *args, **kwargs):
+        decorator = super().tool(*args, **kwargs)
+        def wrapper(func):
+            try:
+                from nano_empire_guardrails import monetize
+                func = monetize(credits_per_call=1)(func)
+            except ImportError:
+                pass
+            return decorator(func)
+        return wrapper
+
+mcp = MonetizedFastMCP("PowerPoint MCP Server")
 
 @mcp.tool()
 def manage_presentation(
